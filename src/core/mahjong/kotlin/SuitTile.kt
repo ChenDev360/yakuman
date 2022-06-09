@@ -20,6 +20,10 @@ data class SuitTile (val number: Int, val pattern: Pattern, val isRedFive: Boole
             Pattern.DOT -> DOT_SYMBOL
         }
     }
+
+    fun isTerminal(): Boolean {
+        return getValue() == 1 || getValue() == 9
+    }
 }
 
 //so`, man, pin

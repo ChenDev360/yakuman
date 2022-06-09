@@ -1,4 +1,4 @@
-import com.sun.tools.javac.Main
+import mahjong.kotlin.HandEvaluator
 
 fun main(args: Array<String>) {
 /*    val wallGenerator = WallGenerator()
@@ -18,13 +18,19 @@ fun main(args: Array<String>) {
 
     val handEvaluator = HandEvaluator()
     val pairs = handEvaluator.getPairs(hand)
-    for (pair in pairs){
-        for(tile in pair){
-            print(tile.getValue())
+    pairs.map {
+        {
+            it.map { it.getValue() }
+            println()
         }
-        //print(sequence[0].getSymbol())
-        println()
     }
+//    for (pair in pairs) {
+//        for (tile in pair) {
+//            print(tile.getValue())
+//        }
+//        //print(sequence[0].getSymbol())
+//        println()
+//    }
 
 /*    val shanten = handEvaluator.calculateShanten(hand)
     print(shanten)*/
@@ -32,7 +38,7 @@ fun main(args: Array<String>) {
     val handGenerator = HandGenerator()
     val hand = handGenerator.generateFromShortPrintable("12333s4m679p44456z")
 
-    val handEvaluator = HandEvaluator()
+    val handEvaluator = mahjong.kotlin.HandEvaluator()
     val sequences = handEvaluator.getSequences(hand)
 
     for (sequence in sequences){

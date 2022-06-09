@@ -1,31 +1,32 @@
 class Hand(
     var handTiles: MutableList<Tile>,
-    val discardedTiles: MutableList<Tile> = mutableListOf()){
+    val discardedTiles: MutableList<Tile> = mutableListOf()
+) {
 
     //All operations on hand assumes that it is sorted
-    fun getBySymbol(symbol: Char) : List<Tile>{
+    fun getBySymbol(symbol: Char): List<Tile> {
         sort()
         return handTiles.filter { it.getSymbol() == symbol }.toList()
     }
 
-    fun getCharacters() : List<Tile>{
+    fun getCharacters(): List<Tile> {
         sort()
         return handTiles.filter { it.getSymbol() == CHARACTER_SYMBOL }.toList()
     }
 
-    fun getBamboo() : List<Tile>{
+    fun getBamboo(): List<Tile> {
         sort()
         return handTiles.filter { it.getSymbol() == BAMBOO_SYMBOL }.toList()
     }
 
-    fun getDots() : List<Tile>{
+    fun getDots(): List<Tile> {
         sort()
         return handTiles.filter { it.getSymbol() == DOT_SYMBOL }.toList()
     }
 
-    fun sort(){
+    fun sort() {
         val suitTiles = handTiles.filterIsInstance<SuitTile>().toMutableList()
-        suitTiles.sortWith(compareBy( { it.pattern }, { it.number }))
+        suitTiles.sortWith(compareBy({ it.pattern }, { it.number }))
 
         val winds = handTiles.filterIsInstance<WindTile>().toMutableList()
         winds.sortWith(compareBy { it.wind })
@@ -33,15 +34,7 @@ class Hand(
         val honors = handTiles.filterIsInstance<DragonTile>().toMutableList()
         honors.sortWith(compareBy { it.dragon })
 
-        handTiles = (suitTiles + winds + honors) as MutableList<Tile>
-/*        handTiles.sortWith(compareBy{
-            when (it) {
-                is Suit -> -1
-                is Honor -> 0
-                is DragonTile -> 1
-                else -> Integer.MAX_VALUE
-            }
-        })*/
+        handTiles = suitTiles.plus(winds).plus(honors).toMutableList()
     }
 
     fun toPrintableShort(): String {
@@ -50,20 +43,21 @@ class Hand(
         val resultBuilder = StringBuilder()
 
         val symbolToPrintIndices = mutableSetOf<Int>()
-        for (symbol in SYMBOL_ORDER){
-            val last = handTiles.findLast { it.getSymbol() == symbol  }
-            val lastIndex = handTiles.indexOfLast { it == last }
-            symbolToPrintIndices.add(lastIndex)
-        }
 
-        for(i in 0 until handTiles.size){
-            resultBuilder.append(handTiles[i].getValue())
-            if(symbolToPrintIndices.contains(i)){
-                resultBuilder.append(handTiles[i].getSymbol())
+        SYMBOL_ORDER
+            .forEach { symbol ->
+                {
+                    val last = handTiles.findLast { it.getSymbol() == symbol }
+                    val lastIndex = handTiles.indexOfLast { it == last }
+                    symbolToPrintIndices.add(lastIndex)
+                }
             }
-        }
 
-        return resultBuilder.toString()
+        handTiles
+            .map { resultBuilder.append(it.getValue()) }
+            .forEachIndexed { index, _ -> if (symbolToPrintIndices.contains(index)) resultBuilder.append(handTiles[index].getSymbol()) }
+
+        return resultBuilder.toString();
     }
 
     fun toPrintable(): String {
@@ -71,15 +65,12 @@ class Hand(
 
         val resultBuilder = StringBuilder()
 
-        for(i in 0 until handTiles.size)
-            resultBuilder.append(handTiles[i].toPrintable())
+        handTiles.map { resultBuilder.append(it.toPrintable()) }
 
-        var result = resultBuilder.toString()
-
-        return result
+        return resultBuilder.toString()
     }
 
-    fun copy():Hand {
+    fun copy(): Hand {
 /*        val suitTiles = handTiles.filterIsInstance<SuitTile>().toMutableList()
         val winds = handTiles.filterIsInstance<WindTile>().toMutableList()
         val honors = handTiles.filterIsInstance<DragonTile>().toMutableList()

@@ -1,16 +1,39 @@
+package mahjong.kotlin
+
+import Hand
+import SUIT_SYMBOL_ORDER
+import SYMBOL_ORDER
+import Tile
+import kotlin.math.min
+
 class HandEvaluator {
 
-    fun getSequences(hand: Hand): List<List<Tile>> {
-        var sequences = mutableListOf<List<Tile>>()
+    private fun getSet(hand: Hand, getSetFunction: (input: List<Tile>) -> List<List<Tile>>): List<List<Tile>> {
+        val set = mutableListOf<List<Tile>>()
 
-        SUIT_SYMBOL_ORDER
+        SYMBOL_ORDER
             .map { hand.getBySymbol(it) }
-            .forEach { sequences.addAll(getSequences(it)) }
+            .forEach { set.addAll(getSetFunction(it)) }
 
-        return sequences
+        return set
     }
 
-    fun getSequences(tiles: List<Tile>): List<List<Tile>> {
+    private fun getSet(
+        tiles: List<Tile>,
+        getSetFunction: (input: List<Tile>) -> List<List<Tile>>,
+    ): List<List<Tile>> {
+        val set = mutableListOf<List<Tile>>()
+
+        SYMBOL_ORDER
+            .map { Extensions.getBySymbol(tiles.toMutableList(), it) }
+            .forEach { set.addAll(getSetFunction(it)) }
+
+        return set
+    }
+
+    fun getSequences(hand: Hand): List<List<Tile>> = getSet(hand, ::getSequences)
+
+    private fun getSequences(tiles: List<Tile>): List<List<Tile>> {
         val sequences = mutableListOf<List<Tile>>()
 
         for (i in tiles.indices) {
@@ -35,15 +58,7 @@ class HandEvaluator {
         return sequences
     }
 
-    fun getTriplets(hand: Hand): List<List<Tile>> {
-        var triplets = mutableListOf<List<Tile>>()
-
-        SYMBOL_ORDER
-            .map { hand.getBySymbol(it) }
-            .forEach { triplets.addAll(getTriplets(it)) }
-
-        return triplets
-    }
+    fun getTriplets(hand: Hand): List<List<Tile>> = getSet(hand, ::getTriplets)
 
     fun getTriplets(tiles: List<Tile>): List<List<Tile>> {
         val triplets = mutableListOf<List<Tile>>()
@@ -51,7 +66,9 @@ class HandEvaluator {
         for (i in tiles.indices) {
             var currentIndex = i
             val firstTile = tiles[currentIndex]
-            if (currentIndex + 1 < tiles.size && tiles[currentIndex + 1].getValue() == firstTile.getValue() && !triplets.any({ it.contains(firstTile)})) {
+            if (currentIndex + 1 < tiles.size && tiles[currentIndex + 1].getValue() == firstTile.getValue() && !triplets.any(
+                    { it.contains(firstTile) })
+            ) {
                 val secondTile = tiles[currentIndex + 1]
                 if (currentIndex + 2 < tiles.size && tiles[currentIndex + 2].getValue() == firstTile.getValue()) {
                     val thirdTile = tiles[currentIndex + 2]
@@ -64,18 +81,45 @@ class HandEvaluator {
         return triplets
     }
 
-    fun getMentsu(hand: Hand): List<List<Tile>> {
-        return getSequences(hand).plus(getTriplets(hand))
+    fun getMentsu(hand: Hand): List<List<Tile>> = getSet(hand, ::getSequences).plus(getTriplets(hand))
+
+    fun getMentsu(tiles: List<Tile>): List<List<Tile>> = getSet(tiles, ::getSequences).plus(getTriplets(tiles))
+
+    fun getTaatsu(tiles: List<Tile>): List<List<Tile>> {
+        var taatsus = mutableListOf<List<Tile>>()
+
+        SUIT_SYMBOL_ORDER
+            .map { Extensions.getBySymbol(tiles.toMutableList(), it) }
+            .forEach { taatsus.addAll(getAlmostSequences(it)) }
+
+        SUIT_SYMBOL_ORDER
+            .map { Extensions.getBySymbol(tiles.toMutableList(), it) }
+            .forEach { taatsus.addAll(getPairs(it)) }
+
+        return taatsus
     }
 
-    fun getMentsu(tiles: List<Tile>): List<List<Tile>> {
-        return getSequences(tiles).plus(getTriplets(tiles))
+    fun getAlmostSequences(tiles: List<Tile>): List<List<Tile>> {
+        val almostSequences = mutableListOf<List<Tile>>()
+
+        for (i in tiles.indices) {
+            var currentIndex = i
+            val firstTile = tiles[currentIndex]
+            while (currentIndex + 1 < tiles.size && tiles[currentIndex + 1].getValue() == firstTile.getValue()) {
+                currentIndex++
+            }
+            if (currentIndex + 1 < tiles.size && tiles[currentIndex + 1].getValue() == firstTile.getValue() + 1) {
+                val secondTile = tiles[currentIndex + 1]
+                val almostSequence = listOf(firstTile, secondTile)
+                almostSequences.add(almostSequence)
+            }
+        }
+
+        return almostSequences
     }
 
 
-    fun getPairs(hand: Hand): List<List<Tile>> {
-        return SYMBOL_ORDER.flatMap{ getPairs(hand.getBySymbol(it)) }
-    }
+    fun getPairs(hand: Hand): List<List<Tile>> = SYMBOL_ORDER.flatMap { getPairs(hand.getBySymbol(it)) }
 
     fun getPairs(tiles: List<Tile>): List<List<Tile>> {
         val visitedIndices = mutableListOf<Int>()
@@ -103,35 +147,66 @@ class HandEvaluator {
     fun calculateShanten(hand: Hand): Int {
         val tiles = hand.handTiles.toMutableList()
         val pairs = getPairs(hand)
-        var bestShanten = Int.MAX_VALUE
+        var maxShanten = Int.MAX_VALUE
 
-        for (pair in pairs) {
-            val tilesWithoutPair = tiles.minus(pair)
-            val currentShanten = recursiveMentsuSearch(tilesWithoutPair, Int.MAX_VALUE)
-            if (currentShanten < bestShanten) {
-                bestShanten = currentShanten
-            }
-        }
+        val bestShanten = pairs
+            .map { tiles.minus(it) }
+            .map { recursiveMentsuSearch(it, Int.MAX_VALUE) }
+            .fold(maxShanten) { _, el -> min(el, maxShanten) }
+
         // handle when no pair
         // handle kokushi
         // handle seven pairs
+
+        if (bestShanten == -1) return 0
 
         return bestShanten
     }
 
     fun recursiveMentsuSearch(tiles: List<Tile>, bestShanten: Int): Int {
+        return insideRecursiveMentsuSearch(tiles, mutableListOf(), mutableListOf(), Int.MAX_VALUE)
+    }
+
+    fun insideRecursiveMentsuSearch(
+        tiles: List<Tile>,
+        mentsuTiles: MutableList<List<Tile>>,
+        taatsuTiles: MutableList<List<Tile>>,
+        bestShanten: Int
+    ): Int {
+        //TODO probably need to sort mentsus and taatsus (?)
+        var bestShantenSoFar = Int.MAX_VALUE
         val allMentsu = getMentsu(tiles.toMutableList())
-        if (allMentsu.isEmpty()) {
-            val currentShanten = tiles.size
-            if (currentShanten < bestShanten) {
-                return currentShanten
-            }
-            return bestShanten
+        bestShantenSoFar =
+            calculateBestShanten(allMentsu, tiles, mentsuTiles, taatsuTiles, bestShanten, bestShantenSoFar)
+
+        val allTaatsu = getTaatsu(tiles.toMutableList())
+        bestShantenSoFar =
+            calculateBestShanten(allTaatsu, tiles, mentsuTiles, taatsuTiles, bestShanten, bestShantenSoFar)
+
+        //val currentShanten = tiles.size + taatsuTiles.size
+        // +2 because we assume that we have a pair
+
+        val currentShanten = 14 - (mentsuTiles.size + taatsuTiles.size + 2)
+        return min(currentShanten, bestShantenSoFar);
+    }
+
+    private fun calculateBestShanten(
+        mentsuOrTaatsu: List<List<Tile>>,
+        tiles: List<Tile>,
+        mentsuTiles: MutableList<List<Tile>>,
+        taatsuTiles: MutableList<List<Tile>>,
+        bestShanten: Int,
+        bestShantenSoFar: Int
+    ): Int {
+        return mentsuOrTaatsu.fold(bestShantenSoFar) { _, element ->
+            min(
+                insideRecursiveMentsuSearch(
+                    tiles.minus(element).toMutableList(),
+                    (mentsuTiles + element) as MutableList<List<Tile>>,
+                    taatsuTiles.toMutableList(),
+                    bestShanten
+                ), bestShantenSoFar
+            )
         }
-        for (mentsu in allMentsu) {
-            recursiveMentsuSearch(tiles.minus(mentsu), tiles.size - mentsu.size)
-        }
-        //TODO
-        return -1
     }
 }
