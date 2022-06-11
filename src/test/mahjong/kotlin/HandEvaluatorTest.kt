@@ -1,3 +1,4 @@
+import mahjong.kotlin.AssertHelpers
 import mahjong.kotlin.HandEvaluator
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -9,7 +10,6 @@ import java.util.stream.Stream
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class HandEvaluatorTest {
-
     private val handEvaluator = HandEvaluator()
     private val handGenerator = HandGenerator()
     private val tileBuilder = TileBuilder()
@@ -59,7 +59,7 @@ class HandEvaluatorTest {
     fun shouldReturnCorrectSequences(hand: String, expectedSequences: List<List<Tile>>) {
         val hand = handGenerator.generateFromShortPrintable(hand)
         val sequences = handEvaluator.getSequences(hand)
-        assertTrue(AreNestedCollectionsEqual(expectedSequences, sequences))
+        assertTrue(AssertHelpers.areNestedCollectionsEqual(expectedSequences, sequences))
     }
 
     fun shouldReturnCorrectSequences(): Stream<Arguments> {
@@ -77,7 +77,7 @@ class HandEvaluatorTest {
     fun shouldReturnCorrectMentsu(hand: String, expectedSequences: List<List<Tile>>) {
         val hand = handGenerator.generateFromShortPrintable(hand)
         val mentsus = handEvaluator.getMentsu(hand)
-        assertTrue(AreNotOrderedNestedCollectionsEqual(expectedSequences, mentsus))
+        assertTrue(AssertHelpers.areNotOrderedNestedCollectionsEqual(expectedSequences, mentsus))
     }
 
     fun shouldReturnCorrectMentsu(): Stream<Arguments> {
@@ -106,43 +106,13 @@ class HandEvaluatorTest {
             Arguments.of("123s124m12356p44z", 2),
             Arguments.of("124s124m12356p44z", 3),
             // kokushi
-            //Arguments.of("19s19m199p1234567z", 0),
+            Arguments.of("19s19m199p1234567z", 0),
+            Arguments.of("19s19m198p1234567z", 1),
+            Arguments.of("19s19m999p1234567z", 1),
+            Arguments.of("19s99m999p1234567z", 2),
             // chiitoitsu
             Arguments.of("1122s1122m1122p11z", 0),
+            //Arguments.of("1122s1122m1122p12z", 1),
         )
-    }
-
-    private fun AreNestedCollectionsEqual(first: List<List<Tile>>, second: List<List<Tile>>): Boolean {
-        first.indices.forEach {
-            val res = AreCollectionsEqual(first[it], second[it])
-            if (!res) return res
-        }
-        return true
-    }
-
-    private fun AreCollectionsEqual(first: List<Tile>, second: List<Tile>): Boolean {
-        if (first.count() != second.count()) return false
-        val firstSorted = first.sortedBy { it.getValue() }
-        val secondSorted = second.sortedBy { it.getValue() }
-        firstSorted.forEachIndexed { index, value ->
-            if (secondSorted[index] != value) {
-                return false
-            }
-        }
-        return true
-    }
-
-    private fun AreNotOrderedNestedCollectionsEqual(first: List<List<Tile>>, second: List<List<Tile>>): Boolean {
-        first.indices.forEach {
-            val res = AreNotOrderedCollectionsEqual(first[it], second[it])
-            if (!res) return res
-        }
-        return true
-    }
-
-    // TODO fix
-    private fun AreNotOrderedCollectionsEqual(first: List<Tile>, second: List<Tile>): Boolean {
-        if (first.count() != second.count()) return false
-        return first.containsAll(second)
     }
 }

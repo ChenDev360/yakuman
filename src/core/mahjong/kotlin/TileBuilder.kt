@@ -1,5 +1,5 @@
 class TileBuilder {
-    fun buildFromPrintable(value: Char, symbol: Char): Tile {
+    private fun buildFromPrintable(value: Char, symbol: Char): Tile {
         when (symbol) {
             BAMBOO_SYMBOL -> return SuitTile(value.toString().toInt(), Pattern.BAMBOO)
             CHARACTER_SYMBOL -> return SuitTile(value.toString().toInt(), Pattern.CHARACTER)

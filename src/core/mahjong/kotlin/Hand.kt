@@ -1,3 +1,5 @@
+import mahjong.kotlin.Extensions
+
 class Hand(
     var handTiles: MutableList<Tile>,
     val discardedTiles: MutableList<Tile> = mutableListOf()
@@ -6,35 +8,26 @@ class Hand(
     //All operations on hand assumes that it is sorted
     fun getBySymbol(symbol: Char): List<Tile> {
         sort()
-        return handTiles.filter { it.getSymbol() == symbol }.toList()
+        return handTiles.filter { it.getSymbol() == symbol }
     }
 
     fun getCharacters(): List<Tile> {
         sort()
-        return handTiles.filter { it.getSymbol() == CHARACTER_SYMBOL }.toList()
+        return handTiles.filter { it.getSymbol() == CHARACTER_SYMBOL }
     }
 
     fun getBamboo(): List<Tile> {
         sort()
-        return handTiles.filter { it.getSymbol() == BAMBOO_SYMBOL }.toList()
+        return handTiles.filter { it.getSymbol() == BAMBOO_SYMBOL }
     }
 
     fun getDots(): List<Tile> {
         sort()
-        return handTiles.filter { it.getSymbol() == DOT_SYMBOL }.toList()
+        return handTiles.filter { it.getSymbol() == DOT_SYMBOL }
     }
 
     fun sort() {
-        val suitTiles = handTiles.filterIsInstance<SuitTile>().toMutableList()
-        suitTiles.sortWith(compareBy({ it.pattern }, { it.number }))
-
-        val winds = handTiles.filterIsInstance<WindTile>().toMutableList()
-        winds.sortWith(compareBy { it.wind })
-
-        val honors = handTiles.filterIsInstance<DragonTile>().toMutableList()
-        honors.sortWith(compareBy { it.dragon })
-
-        handTiles = suitTiles.plus(winds).plus(honors).toMutableList()
+        handTiles = Extensions.sort(this.handTiles).toMutableList()
     }
 
     fun toPrintableShort(): String {
@@ -46,7 +39,7 @@ class Hand(
 
         SYMBOL_ORDER
             .forEach { symbol ->
-                {
+                run {
                     val last = handTiles.findLast { it.getSymbol() == symbol }
                     val lastIndex = handTiles.indexOfLast { it == last }
                     symbolToPrintIndices.add(lastIndex)
@@ -57,7 +50,7 @@ class Hand(
             .map { resultBuilder.append(it.getValue()) }
             .forEachIndexed { index, _ -> if (symbolToPrintIndices.contains(index)) resultBuilder.append(handTiles[index].getSymbol()) }
 
-        return resultBuilder.toString();
+        return resultBuilder.toString()
     }
 
     fun toPrintable(): String {
@@ -68,23 +61,5 @@ class Hand(
         handTiles.map { resultBuilder.append(it.toPrintable()) }
 
         return resultBuilder.toString()
-    }
-
-    fun copy(): Hand {
-/*        val suitTiles = handTiles.filterIsInstance<SuitTile>().toMutableList()
-        val winds = handTiles.filterIsInstance<WindTile>().toMutableList()
-        val honors = handTiles.filterIsInstance<DragonTile>().toMutableList()
-        val tilesCopy: MutableList<Tile> = mutableListOf()
-        for(tile in suitTiles){
-            tilesCopy.add(tile.copy())
-        }
-        for(tile in winds){
-            tilesCopy.add(tile.copy())
-        }
-        for(tile in honors){
-            tilesCopy.add(tile.copy())
-        }*/
-        //TODO copy discards
-        return Hand(handTiles)
     }
 }

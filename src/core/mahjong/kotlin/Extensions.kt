@@ -7,22 +7,34 @@ import WindTile
 
 class Extensions {
     companion object {
-        fun getBySymbol(tiles: MutableList<Tile>, symbol: Char): List<Tile> {
+        fun getBySymbol(tiles: List<Tile>, symbol: Char): List<Tile> {
             val sortedTiles = sort(tiles)
-            return sortedTiles.filter { it.getSymbol() == symbol }.toList()
+            return sortedTiles.filter { it.getSymbol() == symbol }
         }
 
-        private fun sort(tiles: MutableList<Tile>): MutableList<Tile> {
-            val suitTiles = tiles.filterIsInstance<SuitTile>().toMutableList()
-            suitTiles.sortWith(compareBy({ it.pattern }, { it.number }))
+        fun sort(tiles: List<Tile>): List<Tile> {
+            val suitTiles = tiles
+                .filterIsInstance<SuitTile>().toMutableList()
+                .sortedWith(compareBy({ it.pattern }, { it.number }))
 
-            val winds = tiles.filterIsInstance<WindTile>().toMutableList()
-            winds.sortWith(compareBy { it.wind })
+            val winds = tiles.filterIsInstance<WindTile>()
+                .sortedWith(compareBy { it.wind })
 
-            val honors = tiles.filterIsInstance<DragonTile>().toMutableList()
-            honors.sortWith(compareBy { it.dragon })
+            val honors = tiles.filterIsInstance<DragonTile>()
+                .sortedWith(compareBy { it.dragon })
 
-            return suitTiles.plus(winds).plus(honors).toMutableList()
+//            val suitTiles = tiles
+//                .filterIsInstance<SuitTile>().toMutableList()
+//                .sortedWith(compareByDescending<SuitTile> { it.pattern }
+//                    .thenByDescending { it.number })
+//
+//            val winds = tiles.filterIsInstance<WindTile>()
+//                .sortedWith(compareByDescending { it.wind })
+//
+//            val honors = tiles.filterIsInstance<DragonTile>()
+//                .sortedWith(compareByDescending { it.dragon })
+
+            return suitTiles.plus(winds).plus(honors)
         }
     }
 }

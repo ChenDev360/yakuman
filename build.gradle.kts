@@ -14,7 +14,7 @@ repositories {
 }
 
 sourceSets.main {
-    java.srcDirs( "src/core")
+    java.srcDirs("src/core")
 }
 
 sourceSets.test {
@@ -39,4 +39,9 @@ tasks.withType<KotlinCompile>() {
 
 tasks.withType<Test> {
     useJUnitPlatform()
+    this.testLogging {
+        this.showStandardStreams = true
+        this.events = setOf(org.gradle.api.tasks.testing.logging.TestLogEvent.FAILED)
+        this.exceptionFormat = org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL
+    }
 }
