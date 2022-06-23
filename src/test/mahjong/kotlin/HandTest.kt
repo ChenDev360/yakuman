@@ -7,26 +7,24 @@ import java.util.stream.Stream
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class HandTest {
-    private val handGenerator = HandGenerator()
-    private val tileBuilder = TileBuilder()
 
     @ParameterizedTest
     @MethodSource
     fun shouldReturnSortedDots(handAsPrintable: String, expectedDots: List<Tile>) {
-        val hand = handGenerator.generateFromShortPrintable(handAsPrintable)
+        val hand = generateFromShortPrintable(handAsPrintable)
         Assertions.assertEquals(hand.getDots(), expectedDots)
     }
 
     fun shouldReturnSortedDots(): Stream<Arguments> {
         return Stream.of(
             Arguments.of(
-                "13334s44m677p44456z", tileBuilder.buildFromShortPrintable("677p")
+                "13334s44m677p44456z", buildFromShortPrintable("677p")
             ),
             Arguments.of(
-                "13334s44m915p44456z", tileBuilder.buildFromShortPrintable("159p")
+                "13334s44m915p44456z", buildFromShortPrintable("159p")
             ),
             Arguments.of(
-                "13334s44m44456z", tileBuilder.buildFromShortPrintable("")
+                "13334s44m44456z", buildFromShortPrintable("")
             )
         )
     }
@@ -34,20 +32,20 @@ class HandTest {
     @ParameterizedTest
     @MethodSource
     fun shouldReturnSortedBamboo(handAsPrintable: String, expectedBamboo: List<Tile>) {
-        val hand = handGenerator.generateFromShortPrintable(handAsPrintable)
+        val hand = generateFromShortPrintable(handAsPrintable)
         Assertions.assertEquals(expectedBamboo, hand.getBamboo())
     }
 
     fun shouldReturnSortedBamboo(): Stream<Arguments> {
         return Stream.of(
             Arguments.of(
-                "13334s44m677p44456z", tileBuilder.buildFromShortPrintable("13334s")
+                "13334s44m677p44456z", buildFromShortPrintable("13334s")
             ),
             Arguments.of(
-                "481s44m915p44456z", tileBuilder.buildFromShortPrintable("148s")
+                "481s44m915p44456z", buildFromShortPrintable("148s")
             ),
             Arguments.of(
-                "44m44456z", tileBuilder.buildFromShortPrintable("")
+                "44m44456z", buildFromShortPrintable("")
             )
         )
     }
@@ -55,20 +53,20 @@ class HandTest {
     @ParameterizedTest
     @MethodSource
     fun shouldReturnSortedCharacters(handAsPrintable: String, expectedCharacters: List<Tile>) {
-        val hand = handGenerator.generateFromShortPrintable(handAsPrintable)
+        val hand = generateFromShortPrintable(handAsPrintable)
         Assertions.assertEquals(expectedCharacters, hand.getCharacters())
     }
 
     fun shouldReturnSortedCharacters(): Stream<Arguments> {
         return Stream.of(
             Arguments.of(
-                "13334s445m67p44456z", tileBuilder.buildFromShortPrintable("445m")
+                "13334s445m67p44456z", buildFromShortPrintable("445m")
             ),
             Arguments.of(
-                "1333s749m915p44456z", tileBuilder.buildFromShortPrintable("479m")
+                "1333s749m915p44456z", buildFromShortPrintable("479m")
             ),
             Arguments.of(
-                "44456z", tileBuilder.buildFromShortPrintable("")
+                "44456z", buildFromShortPrintable("")
             )
         )
     }
@@ -76,7 +74,7 @@ class HandTest {
     @ParameterizedTest
     @MethodSource
     fun shouldReturnSortedPrintable(handAsPrintable: String, expectedShortPrintable: String) {
-        val hand = handGenerator.generateFromShortPrintable(handAsPrintable)
+        val hand = generateFromShortPrintable(handAsPrintable)
         Assertions.assertEquals(expectedShortPrintable, hand.toPrintable())
     }
 
@@ -91,7 +89,7 @@ class HandTest {
     @ParameterizedTest
     @MethodSource
     fun shouldReturnSortedShortPrintable(handAsPrintable: String, expectedShortPrintable: String) {
-        val hand = handGenerator.generateFromShortPrintable(handAsPrintable)
+        val hand = generateFromShortPrintable(handAsPrintable)
         Assertions.assertEquals(expectedShortPrintable, hand.toPrintableShort())
     }
 

@@ -1,4 +1,4 @@
-import mahjong.kotlin.HandEvaluator
+import mahjong.kotlin.getPairs
 
 fun main(args: Array<String>) {
 /*    val wallGenerator = WallGenerator()
@@ -12,12 +12,10 @@ fun main(args: Array<String>) {
     println(hand.toPrintableShort())
     println(hand.toPrintable())*/
 
-    val handGenerator = HandGenerator()
-    val hand = handGenerator.generateFromShortPrintable("12333s4m679p44456z")
+    val hand = generateFromShortPrintable("12333s4m679p44456z")
     println(hand.toPrintable())
 
-    val handEvaluator = HandEvaluator()
-    val pairs = handEvaluator.getPairs(hand)
+    val pairs = hand.getPairs()
     pairs.map {
         {
             it.map { it.getValue() }

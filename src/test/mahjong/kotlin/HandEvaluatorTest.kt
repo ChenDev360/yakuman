@@ -1,5 +1,4 @@
-import mahjong.kotlin.AssertHelpers
-import mahjong.kotlin.HandEvaluator
+import mahjong.kotlin.*
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.TestInstance
@@ -10,15 +9,12 @@ import java.util.stream.Stream
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class HandEvaluatorTest {
-    private val handEvaluator = HandEvaluator()
-    private val handGenerator = HandGenerator()
-    private val tileBuilder = TileBuilder()
 
     @ParameterizedTest
     @MethodSource
     fun shouldReturnCorrectNumberOfPairs(hand: String, expectedPairs: List<List<Tile>>) {
-        val hand = handGenerator.generateFromShortPrintable(hand)
-        val pairs = handEvaluator.getPairs(hand)
+        val hand = generateFromShortPrintable(hand)
+        val pairs = hand.getPairs()
         assertEquals(expectedPairs, pairs)
         assertEquals(expectedPairs.count(), pairs.count())
     }
@@ -26,9 +22,9 @@ class HandEvaluatorTest {
     fun shouldReturnCorrectNumberOfPairs(): Stream<Arguments> {
         return Stream.of(
             Arguments.of("13334s44m677p44456z", listOf("33s", "44m", "77p", "44z")
-                .map { tileBuilder.buildFromShortPrintable(it) }),
+                .map { buildFromShortPrintable(it) }),
             Arguments.of("59999s4m679p12356z", listOf("99s", "99s")
-                .map { tileBuilder.buildFromShortPrintable(it) }),
+                .map { buildFromShortPrintable(it) }),
             Arguments.of("123456s678p12456z", listOf<List<Tile>>())
         )
     }
@@ -36,8 +32,8 @@ class HandEvaluatorTest {
     @ParameterizedTest
     @MethodSource
     fun shouldReturnCorrectTriplets(hand: String, expectedTriplets: List<List<Tile>>) {
-        val hand = handGenerator.generateFromShortPrintable(hand)
-        val triplets = handEvaluator.getTriplets(hand)
+        val hand = generateFromShortPrintable(hand)
+        val triplets = hand.getTriplets()
         assertEquals(expectedTriplets, triplets)
         assertEquals(expectedTriplets.count(), triplets.count())
     }
@@ -45,29 +41,29 @@ class HandEvaluatorTest {
     fun shouldReturnCorrectTriplets(): Stream<Arguments> {
         return Stream.of(
             Arguments.of("111s111m111p11156z", listOf("111s", "111m", "111p", "111z")
-                .map { tileBuilder.buildFromShortPrintable(it) }),
+                .map { buildFromShortPrintable(it) }),
             Arguments.of("1111s5555678p124z", listOf("111s", "555p")
-                .map { tileBuilder.buildFromShortPrintable(it) }),
+                .map { buildFromShortPrintable(it) }),
             Arguments.of("223s223m223p22345z", listOf<List<Tile>>()),
             Arguments.of("222456777s444577z", listOf("222s", "777s", "444z")
-                .map { tileBuilder.buildFromShortPrintable(it) }),
+                .map { buildFromShortPrintable(it) }),
         )
     }
 
     @ParameterizedTest
     @MethodSource
     fun shouldReturnCorrectSequences(hand: String, expectedSequences: List<List<Tile>>) {
-        val hand = handGenerator.generateFromShortPrintable(hand)
-        val sequences = handEvaluator.getSequences(hand)
+        val hand = generateFromShortPrintable(hand)
+        val sequences = hand.getSequences()
         assertTrue(AssertHelpers.areNestedCollectionsEqual(expectedSequences, sequences))
     }
 
     fun shouldReturnCorrectSequences(): Stream<Arguments> {
         return Stream.of(
             Arguments.of("123456789s444577z", listOf("123s", "234s", "345s", "456s", "567s", "678s", "789s")
-                .map { tileBuilder.buildFromShortPrintable(it) }),
+                .map { buildFromShortPrintable(it) }),
             Arguments.of("2345s123m679p1235z", listOf("234s", "345s", "123m")
-                .map { tileBuilder.buildFromShortPrintable(it) }),
+                .map { buildFromShortPrintable(it) }),
             Arguments.of("124578s679p12477z", listOf<List<Tile>>())
         )
     }
@@ -75,17 +71,17 @@ class HandEvaluatorTest {
     @ParameterizedTest
     @MethodSource
     fun shouldReturnCorrectMentsu(hand: String, expectedSequences: List<List<Tile>>) {
-        val hand = handGenerator.generateFromShortPrintable(hand)
-        val mentsus = handEvaluator.getMentsu(hand)
+        val hand = generateFromShortPrintable(hand)
+        val mentsus = hand.getMentsu()
         assertTrue(AssertHelpers.areNotOrderedNestedCollectionsEqual(expectedSequences, mentsus))
     }
 
     fun shouldReturnCorrectMentsu(): Stream<Arguments> {
         return Stream.of(
             Arguments.of("222456777s444577z", listOf("456s", "567s", "222s", "777s", "444z")
-                .map { tileBuilder.buildFromShortPrintable(it) }),
+                .map { buildFromShortPrintable(it) }),
             Arguments.of("2345s123m679p1115z", listOf("234s", "345s", "123m", "111z")
-                .map { tileBuilder.buildFromShortPrintable(it) }),
+                .map { buildFromShortPrintable(it) }),
             Arguments.of("124578s679p12477z", listOf<List<Tile>>())
         )
     }
@@ -93,9 +89,9 @@ class HandEvaluatorTest {
     @ParameterizedTest
     @MethodSource
     fun shouldReturnCorrectShanten(hand: String, expectedShanten: Int) {
-        val hand = handGenerator.generateFromShortPrintable(hand)
+        val hand = generateFromShortPrintable(hand)
         hand.sort()
-        val shanten = handEvaluator.calculateShanten(hand)
+        val shanten = hand.calculateShanten()
         assertEquals(expectedShanten, shanten)
     }
 
