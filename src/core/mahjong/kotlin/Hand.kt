@@ -33,22 +33,21 @@ class Hand(
     fun toPrintableShort(): String {
         sort()
 
-        val resultBuilder = StringBuilder()
-
-        val symbolToPrintIndices = mutableSetOf<Int>()
-
-        SYMBOL_ORDER
-            .forEach { symbol ->
-                run {
-                    val last = handTiles.findLast { it.getSymbol() == symbol }
-                    val lastIndex = handTiles.indexOfLast { it == last }
-                    symbolToPrintIndices.add(lastIndex)
-                }
+        val symbolToPrintIndices = SYMBOL_ORDER
+            .map { symbol ->
+                val last = handTiles.findLast { it.getSymbol() == symbol }
+                handTiles.indexOfLast { it == last }
             }
 
+        val resultBuilder = StringBuilder()
+
         handTiles
-            .map { resultBuilder.append(it.getValue()) }
-            .forEachIndexed { index, _ -> if (symbolToPrintIndices.contains(index)) resultBuilder.append(handTiles[index].getSymbol()) }
+            .forEachIndexed { index, _ ->
+                if (symbolToPrintIndices.contains(index)) resultBuilder.append(
+                    handTiles[index].getValue(),
+                    handTiles[index].getSymbol()
+                ) else resultBuilder.append(handTiles[index].getValue())
+            }
 
         return resultBuilder.toString()
     }

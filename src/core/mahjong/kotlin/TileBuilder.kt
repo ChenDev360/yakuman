@@ -26,7 +26,7 @@ class TileBuilder {
             if (hand[i].isLetter()) {
                 val endIndex = i - 1
                 val symbol = hand[i]
-                for (j in endIndex downTo startIndex) {
+                for (j in startIndex..endIndex) {
                     val tile = buildFromPrintable(hand[j], symbol)
                     handTiles.add(tile)
                 }
